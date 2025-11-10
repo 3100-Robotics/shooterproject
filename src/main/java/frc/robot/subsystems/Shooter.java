@@ -32,12 +32,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
-    private SparkMax shooter_motor = new SparkMax(99, MotorType.kBrushless);
+    private SparkMax shooter_motor = new SparkMax(5, MotorType.kBrushless);
     private RelativeEncoder shooter_motor_encoder = shooter_motor.getEncoder();
 
-    private SparkBaseConfig shooter_config = new SparkMaxConfig().idleMode(IdleMode.kCoast);
+    private SparkBaseConfig shooter_config = new SparkMaxConfig().idleMode(IdleMode.kCoast).inverted(true);
 
-    private final double NOMINAL_SPEED = 1;
+    private final double NOMINAL_SPEED = 0.4;
     private double speed = NOMINAL_SPEED;
 
     // Simulation

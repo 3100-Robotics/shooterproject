@@ -33,19 +33,20 @@ import frc.robot.Robot;
 
 public class Indexer extends SubsystemBase {
     private final DCMotor GEARBOX = DCMotor.getNEO(1);
-    private SparkMax indexer_motor = new SparkMax(0x14, MotorType.kBrushless);
+    private SparkMax indexer_motor = new SparkMax(3, MotorType.kBrushless);
 
-    private SparkBaseConfig indexer_config = new SparkMaxConfig().idleMode(IdleMode.kBrake);
+    private SparkBaseConfig indexer_config = new SparkMaxConfig().idleMode(IdleMode.kBrake).inverted(true);
 
-    private final double NOMINAL_SPEED = 1;
+    private final double NOMINAL_SPEED = 0.4;
     private double speed = NOMINAL_SPEED;
+    private double output_speed = NOMINAL_SPEED;
 
     private String state = "none";
 
     private DigitalInput beam_break = new DigitalInput(0);
     private DIOSim beam_break_sim = new DIOSim(beam_break);
-    private Trigger ballishere = new Trigger(()->beam_break.get());
-    private Trigger ballisgone = new Trigger(()->!beam_break.get());
+    private Trigger ballishere = new Trigger(()->!beam_break.get());
+    private Trigger ballisgone = new Trigger(()->beam_break.get());
 
     // Simulation
     private SparkMaxSim indexer_motor_sim = new SparkMaxSim(indexer_motor, GEARBOX);
@@ -62,6 +63,7 @@ public class Indexer extends SubsystemBase {
         }
         indexer_motor.configure(indexer_config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         SmartDashboard.putNumber("indexer_speed_multiplier", NOMINAL_SPEED);
+        SmartDashboard.putNumber("indexer_output_speed_multiplier", NOMINAL_SPEED);
     }
 
     @Override
@@ -91,6 +93,7 @@ public class Indexer extends SubsystemBase {
         SmartDashboard.putString("indexer_command", state);
 
         speed = MathUtil.clamp(SmartDashboard.getNumber("indexer_speed_multiplier", NOMINAL_SPEED), 0f, 1f);
+        output_speed = MathUtil.clamp(SmartDashboard.getNumber("indexer_output_speed_multiplier", NOMINAL_SPEED), 0f, 1f);
     }
 
     public Command wb_intake() {
@@ -100,7 +103,7 @@ public class Indexer extends SubsystemBase {
     }
 
     public Command wb_release() {
-        return run(()->{indexer_motor.set(speed);state="relasing";})
+        return run(()->{indexer_motor.set(output_speed);state="relasing";})
                 .until(ballisgone)
                 .andThen(runOnce(()->{indexer_motor.stopMotor();state="reld";}));
     }
